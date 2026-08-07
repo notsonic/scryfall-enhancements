@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Scryfall Enhancements",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Add more legalities to scryfall.com.",
   "icons": {
     "16": "icon_16.png",
@@ -15,7 +15,13 @@
         "https://*.scryfall.com/card/*",
         "https://*.scryfall.com/search*"
     ],
-      "js": ["contentScript.js"]
+      "js": ["scryfall.js"]
+    },
+    {
+      "matches": [
+        "https://*.mtgtop8.com/topcards*"
+    ],
+      "js": ["mtgtop8.js"]
     }
   ]
 }
