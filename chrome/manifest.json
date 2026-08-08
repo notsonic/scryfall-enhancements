@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MTG Enhancements",
-  "version": "0.2",
+  "version": "0.3",
   "description": "Add features to popular MTG websites.",
   "icons": {
     "16": "icon_16.png",
@@ -23,5 +23,13 @@
     ],
       "js": ["mtgtop8.js"]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{c1e0b163-fd02-45de-b694-08515b0a0b80}",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
 }

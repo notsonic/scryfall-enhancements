@@ -22,20 +22,6 @@ const tableSelector = [
     "tbody"
 ].join(" > ");
 
-// HTML for the threat header cell.
-const threatHeaderHtml = `
-<td class="S14" align="center" title="Threat Level">
-    Threat
-</td>
-`;
-
-// HTML for the threat value table cell.
-const threatCellHtml = (vars) => `
-<td id="${vars.rowId}_4" class="L14" align="right" title="Blechmans">
-    ${vars.threatLevel}
-</td>
-`;
-
 // Calculate the threat level for a given row
 // Threat is the percentage of decks a card is in multiplied
 // by the number of copies. Round to 2 decimals to keep it clean.
@@ -48,28 +34,37 @@ function calculateThreatLevel(row) {
 
 // Main function.
 function main() {
-    var tableElement;
-
     // Say hi.
-    console.log("hello. mtgtop8 enhancements v0.2.");
+    const manifest = browser.runtime.getManifest();
+    console.log(`hello. mtgtop8 enhancements v${manifest.version}.`);
 
     // Get the table of cards.
-    tableElement = document.querySelector(tableSelector);
+    const tableElement = document.querySelector(tableSelector);
+
+    // New element for the threat header cell.
+    const threatHeaderElement = document.createElement("td");
+    threatHeaderElement.className = "S14";
+    threatHeaderElement.setAttribute("align", "center");
+    threatHeaderElement.setAttribute("title", "Threat Level");
+    threatHeaderElement.textContent = "Threat";
+
+    // New element for a threat value table cell.
+    const threatCellElement = document.createElement("td");
+    threatCellElement.className = "L14";
+    threatCellElement.setAttribute("align", "right");
+    threatCellElement.setAttribute("title", "Blechmans");
 
     // Iterate over the rows adding a new column for Threat Level.
     for (const row of tableElement.rows) {
         if (row.rowIndex === 0) {
             // Add the header cell.
-            row.insertAdjacentHTML("beforeEnd", threatHeaderHtml);
+            row.appendChild(threatHeaderElement);
         } else {
             // Add the per card threat level cell.
-            row.insertAdjacentHTML(
-                "beforeEnd",
-                threatCellHtml({
-                    "rowId": row.id,
-                    "threatLevel": calculateThreatLevel(row)
-                })
-            );
+            const newCell = threatCellElement.cloneNode(false);
+            newCell.id = `${row.id}_4`;
+            newCell.textContent = calculateThreatLevel(row);
+            row.appendChild(newCell);
         }
     }
 }
