@@ -4,9 +4,10 @@
 
 /*jslint devel: true */
 /*jslint browser: true */
+/*global browser */
 
 // Object mapping legalities, their text labels, and css classes.
-var legalities = {
+const legalities = {
     banned: {
         class: "banned",
         label: "Banned"
@@ -32,81 +33,91 @@ var legalities = {
 // Card legality overrides to handle edge cases where scryfall doesn't have
 // all the answers we need. Lookup by Oracle Id to handle every print
 // and language.
-var overrides = {
+const overrides = {
     heritage: {
         // Candelabra of Tawnos
         "c7c7bffa-442d-4ba5-b778-ad394c192f27": "legal"
     }
 };
 
-// HTML to insert into the page.
-var tableHtml = `
-<div class="card-legality-row">
-    <div id="premodern-legality" class="card-legality-item">
-        <dt>Premodern</dt>
-        <dd class="not-legal">Loading</dd>
-    </div>
-    <div id="heritage-legality" class="card-legality-item">
-        <dt>Heritage</dt>
-        <dd class="not-legal">Loading</dd>
-    </div>
-</div>
-`;
+// ID, Name, and Oracle ID of the current card.
+const cardSelector = "meta[name=\"scryfall:card:id\"]";
+const cardId = document.querySelector(cardSelector)?.content;
 
-// Id and Name of the current card.
-var cardId = document.querySelector("meta[name=\"scryfall:card:id\"]")?.content;
-var cardName = document.querySelector("meta[property=\"og:title\"]")?.content;
-var oracleId = document
-    .querySelector("meta[name=\"scryfall:oracle:id\"]")
-    ?.content;
+const nameSelector = "meta[property=\"og:title\"]";
+const cardName = document.querySelector(nameSelector)?.content;
+
+const oracleSelector = "meta[name=\"scryfall:oracle:id\"]";
+const oracleId = document.querySelector(oracleSelector)?.content;
 
 // Insert the table HTML into the page.
-function renderHTML() {
-    document
-        .querySelector("#main .card-legality")
-        .insertAdjacentHTML("beforeEnd", tableHtml);
+function createNewTableElements(formats) {
+    // Create a cell for each format requested.
+    const legalityCells = [];
+    for (const format of formats) {
+        const legalityCell = document.createElement("div");
+        legalityCell.id = `${format.label}-legality`;
+        legalityCell.className = "card-legality-item";
+        const legalityTerm = document.createElement("dt");
+        legalityTerm.textContent = format.name;
+        const legalityDetails = document.createElement("dd");
+        legalityDetails.className = "not-legal";
+        legalityDetails.textContent = "Loading";
+
+        legalityCell.appendChild(legalityTerm);
+        legalityCell.appendChild(legalityDetails);
+
+        legalityCells.push(legalityCell);
+    }
+
+    // Create a new row and add the cells, 2 at a time.
+    for (let i = 0; i < legalityCells.length; i += 2) {
+        const legalityRow = document.createElement("div");
+        legalityRow.className = "card-legality-row";
+        legalityRow.appendChild(legalityCells[i]);
+        if (i + 1 < legalityCells.length) {
+            legalityRow.appendChild(legalityCells[i + 1]);
+        }
+
+        document
+            .querySelector("#main .card-legality")
+            .appendChild(legalityRow);
+    }
 }
 
 // Helper function to update an element to a specified legality.
 function setLegality(elem, legality) {
-    elem.innerHTML = legalities[legality].label;
+    elem.textContent = legalities[legality].label;
     elem.classList.replace("not-legal", legalities[legality].class);
 }
 
 // Handle a format that scryfall has legality information for
 // but does not display by default.
 async function handleKnownFormat(elem, format) {
-    var cardURL = `https://api.scryfall.com/cards/${cardId}`;
-    var response = await fetch(cardURL);
-    var json = await response.json();
-    var legality = json.legalities[format];
+    const cardURL = `https://api.scryfall.com/cards/${cardId}`;
+    const response = await fetch(cardURL);
+    const json = await response.json();
+    const legality = json.legalities[format];
 
     setLegality(elem, legality);
 }
 
 // Handle the heritage format via custom search query and exception lookup.
 async function handleHeritage(elem) {
-    var query;
-    var queryEncoded;
-    var searchURL;
-    var response;
-    var jsonResponse;
-    var cardData;
-
     if (overrides.heritage[oracleId]) {
         setLegality(elem, overrides.heritage[oracleId]);
         return;
     }
 
-    query = [
+    const query = [
         `oracleid:${oracleId}`,
         "(st:core OR st:expansion)",
         "-atag:external-ip"
     ].join(" AND ");
-    queryEncoded = encodeURI(query);
-    searchURL = `https://api.scryfall.com/cards/search?q=${queryEncoded}`;
+    const queryEncoded = encodeURI(query);
+    const searchURL = `https://api.scryfall.com/cards/search?q=${queryEncoded}`;
 
-    response = await fetch(searchURL);
+    const response = await fetch(searchURL);
     if (response.status === 404) {
         setLegality(elem, "not_legal");
         return;
@@ -117,23 +128,21 @@ async function handleHeritage(elem) {
         return;
     }
 
-    jsonResponse = await response.json();
+    const jsonResponse = await response.json();
     if (jsonResponse?.total_cards !== 1) {
         setLegality(elem, undefined);
         return;
     }
 
-    cardData = jsonResponse?.data?.[0];
+    const cardData = jsonResponse?.data?.[0];
     setLegality(elem, cardData?.legalities?.legacy);
 }
 
 // Main function.
 function main() {
-    var premodernElement;
-    var heritageElement;
-
     // Say hi.
-    console.log("hello. scryfall enhancements v0.2.");
+    const manifest = browser.runtime.getManifest();
+    console.log(`hello. scryfall enhancements v${manifest.version}.`);
 
     // Don't do anything if we're not looking at a single card.
     if (
@@ -144,15 +153,18 @@ function main() {
         return;
     }
 
-    // Insert the placeholder HTML.
-    renderHTML();
+    // Create new placeholder element and insert it into the dom.
+    createNewTableElements([
+        {label: "premodern", name: "Premodern"},
+        {label: "heritage", name: "Heritage"}
+    ]);
 
     // Fetch Premodern legality.
-    premodernElement = document.querySelector("#premodern-legality dd");
+    const premodernElement = document.querySelector("#premodern-legality dd");
     handleKnownFormat(premodernElement, "premodern");
 
     // Fetch Heritage legality.
-    heritageElement = document.querySelector("#heritage-legality dd");
+    const heritageElement = document.querySelector("#heritage-legality dd");
     handleHeritage(heritageElement);
 }
 main();
