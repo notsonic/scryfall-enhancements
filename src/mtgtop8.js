@@ -4,6 +4,7 @@
 
 /*jslint devel: true */
 /*jslint browser: true */
+/*global browser */
 
 // Is this reliable? Can it be improved? MTGTop8 uses very few IDs.
 const tableSelector = [
@@ -32,8 +33,23 @@ function calculateThreatLevel(row) {
     return threatLevelRaw.toFixed(2);
 }
 
+// Load settings from browser storage.
+async function getEnabledFromSettings() {
+    const settings = await browser.storage.sync.get({
+        "mtgtop8_threat_level": true
+    });
+
+    return settings?.mtgtop8_threat_level;
+}
+
 // Main function.
-function main() {
+async function main() {
+    // Get if this feature is enabled from settings.
+    const enabled = await getEnabledFromSettings();
+    if (!enabled) {
+        return;
+    }
+
     // Say hi.
     const manifest = browser.runtime.getManifest();
     console.log(`hello. mtgtop8 enhancements v${manifest.version}.`);

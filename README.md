@@ -13,7 +13,26 @@ Heritage legality is determined using the following query and Legacy legality.
 ```
 oracleid:<oracleId> AND (st:core OR st:expansion) AND -atag:external-ip
 ```
-A hard coded list of overrides accounts for where Heritage has deviated from Legacy.
+A hard coded list of overrides accounts for where Heritage
+has deviated from Legacy.
+
+## Classic Legacy
+Classic Legacy legality is determined using the following query
+and Legacy legality.
+```
+oracleid:<oracleId> AND legal:legacy AND date<=roe
+```
+A hard coded list of overrides accoutns for where Classic Legacy
+deviates from Legacy.
+
+## Peak Legacy
+Peak Legacy legality is determined using the following query
+and Legacy legality.
+```
+oracleid:<oracleId> AND legal:legacy AND date<=emn
+```
+A hard coded list of overrides accoutns for where Peak Legacy
+deviates from Legacy.
 
 # MTGTop8.com
 Add Threat Level to the Most Played cards page.

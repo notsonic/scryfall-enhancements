@@ -4,6 +4,7 @@
 
 /*jslint devel: true */
 /*jslint browser: true */
+/*jslint unordered: true */
 /*global browser */
 
 // Object mapping legalities, their text labels, and css classes.
@@ -30,13 +31,105 @@ const legalities = {
     }
 };
 
+// Object mapping formats, their display names, and handlers.
+const supported_formats = {
+    classic: {
+        handler: handleTypicalFormat,
+        name: "Classic Legacy",
+        query: [
+            "legal:legacy",
+            "date<=roe"
+        ].join(" AND ")
+    },
+    heritage: {
+        handler: handleTypicalFormat,
+        name: "Heritage",
+        query: [
+            "(st:core OR st:expansion)",
+            "-atag:external-ip"
+        ].join(" AND ")
+    },
+    peak: {
+        handler: handleTypicalFormat,
+        name: "Peak Legacy",
+        query: [
+            "legal:legacy",
+            "date<=emn"
+        ].join(" AND ")
+    },
+    premodern: {
+        handler: handleKnownFormat,
+        name: "Premodern"
+    }
+};
+
 // Card legality overrides to handle edge cases where scryfall doesn't have
 // all the answers we need. Lookup by Oracle Id to handle every print
 // and language.
 const overrides = {
+    classic: {
+        // Candelabra of Tawnos
+        "c7c7bffa-442d-4ba5-b778-ad394c192f27": "legal",
+        // Cleanse
+        "a610c77c-fe31-4465-a1c1-392db4ce4ed1": "legal",
+        // Crusade
+        "4692740f-be90-459f-8d90-c4ae71771595": "legal",
+        // Entomb
+        "299fc083-0834-4064-8344-f895aff68867": "legal",
+        // Imprison
+        "632de66b-2314-4299-847c-16a84bf9121f": "legal",
+        // Invoke Prejudice
+        "854ad486-0c59-4c57-9a76-ab1dff0ff37c": "legal",
+        // Jihad
+        "b18b9869-8490-4875-a5bb-484c3299f2c5": "legal",
+        // Mind's Desire
+        "b3739b5a-5731-4c64-a244-815a363b0d5c": "banned",
+        // Pradesh Gypsies
+        "37c49483-bef6-47c6-9354-ead8560d48da": "legal",
+        // Sensei's Divining Top
+        "13575cf9-65c1-4861-b21e-eb2155e07766": "legal",
+        // Stone-Throwing Devils
+        "124c8663-21f3-4cd8-a060-9d04be35c43f": "legal",
+        // Survival of the Fittest
+        "119d719d-e965-45b4-9bc9-ac03211b10c2": "legal",
+        // Vengevine
+        "7ed52301-81ea-4e7f-b985-cfab0593cae4": "banned",
+        // Worldgorger Dragon
+        "a628186d-b7d9-40a5-9ae2-fbc9d2a14c7c": "banned"
+    },
     heritage: {
         // Candelabra of Tawnos
         "c7c7bffa-442d-4ba5-b778-ad394c192f27": "legal"
+    },
+    peak: {
+        // Candelabra of Tawnos
+        "c7c7bffa-442d-4ba5-b778-ad394c192f27": "legal",
+        // Cleanse
+        "a610c77c-fe31-4465-a1c1-392db4ce4ed1": "legal",
+        // Crusade
+        "4692740f-be90-459f-8d90-c4ae71771595": "legal",
+        // Deathrite Shaman
+        "22f1a4a4-c423-4d1c-8775-0ed604a9fa51": "legal",
+        // Entomb
+        "299fc083-0834-4064-8344-f895aff68867": "legal",
+        // Gitaxian Probe
+        "1d67f5ff-1fce-45e5-b6a1-416c569351e2": "legal",
+        // Imprison
+        "632de66b-2314-4299-847c-16a84bf9121f": "legal",
+        // Invoke Prejudice
+        "854ad486-0c59-4c57-9a76-ab1dff0ff37c": "legal",
+        // Jihad
+        "b18b9869-8490-4875-a5bb-484c3299f2c5": "legal",
+        // Mind's Desire
+        "b3739b5a-5731-4c64-a244-815a363b0d5c": "banned",
+        // Pradesh Gypsies
+        "37c49483-bef6-47c6-9354-ead8560d48da": "legal",
+        // Sensei's Divining Top
+        "13575cf9-65c1-4861-b21e-eb2155e07766": "legal",
+        // Stone-Throwing Devils
+        "124c8663-21f3-4cd8-a060-9d04be35c43f": "legal",
+        // Undercity Informer
+        "ccf5a0d4-69e8-4607-a76c-cfca336899e4": "legal"
     }
 };
 
@@ -56,10 +149,10 @@ function createNewTableElements(formats) {
     const legalityCells = [];
     for (const format of formats) {
         const legalityCell = document.createElement("div");
-        legalityCell.id = `${format.label}-legality`;
+        legalityCell.id = `${format}-legality`;
         legalityCell.className = "card-legality-item";
         const legalityTerm = document.createElement("dt");
-        legalityTerm.textContent = format.name;
+        legalityTerm.textContent = supported_formats[format].name;
         const legalityDetails = document.createElement("dd");
         legalityDetails.className = "not-legal";
         legalityDetails.textContent = "Loading";
@@ -102,17 +195,16 @@ async function handleKnownFormat(elem, format) {
     setLegality(elem, legality);
 }
 
-// Handle the heritage format via custom search query and exception lookup.
-async function handleHeritage(elem) {
-    if (overrides.heritage[oracleId]) {
-        setLegality(elem, overrides.heritage[oracleId]);
+// Handle a typical custom format via a search query and exception lookup.
+async function handleTypicalFormat(elem, format) {
+    if (overrides?.[format]?.[oracleId]) {
+        setLegality(elem, overrides[format][oracleId]);
         return;
     }
 
     const query = [
         `oracleid:${oracleId}`,
-        "(st:core OR st:expansion)",
-        "-atag:external-ip"
+        `${supported_formats[format].query}`
     ].join(" AND ");
     const queryEncoded = encodeURI(query);
     const searchURL = `https://api.scryfall.com/cards/search?q=${queryEncoded}`;
@@ -138,8 +230,26 @@ async function handleHeritage(elem) {
     setLegality(elem, cardData?.legalities?.legacy);
 }
 
+// Load settings from browser storage.
+async function getEnabledFormatsFromSettings() {
+    const settings = await browser.storage.sync.get({
+        "scryfall_formats": ["premodern", "heritage"]
+    });
+
+    const formats = settings?.scryfall_formats;
+    const sanitizedFormats = formats
+        .filter((format) => supported_formats.hasOwnProperty(format));
+    return sanitizedFormats;
+}
+
 // Main function.
-function main() {
+async function main() {
+    // Get enabled formats from settings.
+    const enabledFormats = await getEnabledFormatsFromSettings();
+    if (enabledFormats?.length < 1) {
+        return;
+    }
+
     // Say hi.
     const manifest = browser.runtime.getManifest();
     console.log(`hello. scryfall enhancements v${manifest.version}.`);
@@ -153,18 +263,13 @@ function main() {
         return;
     }
 
-    // Create new placeholder element and insert it into the dom.
-    createNewTableElements([
-        {label: "premodern", name: "Premodern"},
-        {label: "heritage", name: "Heritage"}
-    ]);
+    // Create new placeholder elements and insert them into the dom.
+    createNewTableElements(enabledFormats);
 
-    // Fetch Premodern legality.
-    const premodernElement = document.querySelector("#premodern-legality dd");
-    handleKnownFormat(premodernElement, "premodern");
-
-    // Fetch Heritage legality.
-    const heritageElement = document.querySelector("#heritage-legality dd");
-    handleHeritage(heritageElement);
+    // Fetch and display legality for enabled formats.
+    for (const format of enabledFormats) {
+        const elem = document.querySelector(`#${format}-legality dd`);
+        supported_formats[format].handler(elem, format);
+    }
 }
 main();

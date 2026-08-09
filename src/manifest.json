@@ -24,6 +24,10 @@
       "js": ["mtgtop8.js"]
     }
   ],
+  "options_page": "options.html",
+  "permissions": [
+    "storage"
+  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "{c1e0b163-fd02-45de-b694-08515b0a0b80}",
