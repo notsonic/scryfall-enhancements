@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MTG Enhancements Options</title>
+  </head>
+  <body>
+    <h1>MTG Enhancements Options</h1>
+    <p>Toggle various options for different sites and features.</p>
+    <div id="form_container">
+        <form id="mtg_enhancements_options">
+            <h2>Scryfall.com</h2>
+            <div id="scryfall">
+                <div>
+                    <p>Select the formats you would like to display the legalities for.</p>
+                </div>
+                <div>
+                    <input type="checkbox" id="scryfall_formats_premodern" name="scryfall_formats" value="premodern">
+                    <label for="premodern">Premodern</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="scryfall_formats_heritage" name="scryfall_formats" value="heritage">
+                    <label for="heritage">Heritage</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="scryfall_formats_classic" name="scryfall_formats" value="classic">
+                    <label for="classic">Classic</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="scryfall_formats_peak" name="scryfall_formats" value="peak">
+                    <label for="peak">Peak</label>
+                </div>
+            </div>
+
+            <div id="mtgtop8">
+                <h2>MTGTop8.com</h2>
+                <div>
+                    <p>Select if you want to enable showing Threat Level (in Blechmans).</p>
+                </div>
+                <div>
+                    <input type="checkbox" id="mtgtop8_threat_level" name="mtgtop8_threat_level">
+                    <label for="threat_level">Enable Threat Level</label>
+                </div>
+            </div>
+            <hr>
+            <div id="form_controls">
+                <div id="status"></div>
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>
