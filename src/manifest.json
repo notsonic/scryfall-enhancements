@@ -24,6 +24,9 @@
       "js": ["mtgtop8.js"]
     }
   ],
+  "action": {
+    "default_popup": "popup.html"
+  },
   "options_page": "options.html",
   "permissions": [
     "storage"

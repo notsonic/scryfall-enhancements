@@ -56,6 +56,9 @@ async function main() {
 
     // Get the table of cards.
     const tableElement = document.querySelector(tableSelector);
+    if (!tableElement?.rows?.length > 0) {
+        return;
+    }
 
     // New element for the threat header cell.
     const threatHeaderElement = document.createElement("td");
