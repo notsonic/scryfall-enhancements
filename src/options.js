@@ -4,42 +4,47 @@
 /*jslint browser: true */
 /*global browser */
 
-const form = document.querySelector("#mtg_enhancements_options");
-
-function formSubmitHandler(event) {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    const settingsFromForm = {
-        "mtgtop8_threat_level": Boolean(formData.get("mtgtop8_threat_level")),
-        "scryfall_formats": formData.getAll("scryfall_formats")
-    };
-    browser.storage.sync.set(settingsFromForm, saveCallback());
-}
-form.addEventListener("submit", formSubmitHandler);
-
-function saveCallback() {
+function formStatusToast(message) {
     const status = document.getElementById("status");
-    status.textContent = "Options saved.";
+    status.textContent = message;
     setTimeout(function () {
         status.textContent = "";
     }, 750);
 }
 
-function restoreOptions() {
-    browser.storage.sync.get({
+async function formSubmitHandler(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const optionsFromForm = {
+        "mtgtop8_threat_level": Boolean(formData.get("mtgtop8_threat_level")),
+        "scryfall_formats": formData.getAll("scryfall_formats")
+    };
+
+    await browser.storage.sync.set(optionsFromForm);
+    formStatusToast("Options saved.");
+}
+
+async function restoreOptions() {
+    const options = await browser.storage.sync.get({
         "mtgtop8_threat_level": true,
         "scryfall_formats": ["premodern", "heritage"]
-    }, function (settings) {
-        document
-            .getElementById("mtgtop8_threat_level")
-            .checked = settings.mtgtop8_threat_level;
-        for (const format of settings.scryfall_formats) {
-            document
-                .getElementById(`scryfall_formats_${format}`)
-                .checked = true;
-        }
     });
-    return;
+
+    document
+        .getElementById("mtgtop8_threat_level")
+        .checked = options.mtgtop8_threat_level;
+
+    for (const format of options.scryfall_formats) {
+        document
+            .getElementById(`scryfall_formats_${format}`)
+            .checked = true;
+    }
 }
-document.addEventListener("DOMContentLoaded", restoreOptions);
+
+function main() {
+    const form = document.querySelector("#mtg_enhancements_options");
+    form.addEventListener("submit", formSubmitHandler);
+    document.addEventListener("DOMContentLoaded", restoreOptions);
+}
+main();

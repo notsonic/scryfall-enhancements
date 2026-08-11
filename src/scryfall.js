@@ -41,6 +41,18 @@ const supported_formats = {
             "date<=roe"
         ].join(" AND ")
     },
+    duel: {
+        handler: handleKnownFormat,
+        name: "Duel Comm."
+    },
+    future: {
+        handler: handleKnownFormat,
+        name: "Future Std."
+    },
+    gladiator: {
+        handler: handleKnownFormat,
+        name: "Gladiator"
+    },
     heritage: {
         handler: handleTypicalFormat,
         name: "Heritage",
@@ -48,6 +60,14 @@ const supported_formats = {
             "(st:core OR st:expansion)",
             "-atag:external-ip"
         ].join(" AND ")
+    },
+    oldschool: {
+        handler: handleKnownFormat,
+        name: "Old School"
+    },
+    paupercommander: {
+        handler: handleKnownFormat,
+        name: "Pauper Comm."
     },
     peak: {
         handler: handleTypicalFormat,
@@ -57,13 +77,25 @@ const supported_formats = {
             "date<=emn"
         ].join(" AND ")
     },
+    predh: {
+        handler: handleKnownFormat,
+        name: "PreDH"
+    },
     premodern: {
         handler: handleKnownFormat,
         name: "Premodern"
+    },
+    standardbrawl: {
+        handler: handleKnownFormat,
+        name: "Standard Brawl"
+    },
+    tinyleaders: {
+        handler: handleKnownFormat,
+        name: "Tiny Leaders"
     }
 };
 
-// Card legality overrides to handle edge cases where scryfall doesn't have
+// Card legality overrides to handle edge cases where Scryfall doesn't have
 // all the answers we need. Lookup by Oracle Id to handle every print
 // and language.
 const overrides = {
@@ -134,14 +166,14 @@ const overrides = {
 };
 
 // ID, Name, and Oracle ID of the current card.
-const cardSelector = "meta[name=\"scryfall:card:id\"]";
-const cardId = document.querySelector(cardSelector)?.content;
+const scryfallIdSelector = "meta[name=\"scryfall:card:id\"]";
+const scryfallId = document.querySelector(scryfallIdSelector)?.content;
 
-const nameSelector = "meta[property=\"og:title\"]";
-const cardName = document.querySelector(nameSelector)?.content;
+const cardNameSelector = "meta[property=\"og:title\"]";
+const cardName = document.querySelector(cardNameSelector)?.content;
 
-const oracleSelector = "meta[name=\"scryfall:oracle:id\"]";
-const oracleId = document.querySelector(oracleSelector)?.content;
+const oracleIdSelector = "meta[name=\"scryfall:oracle:id\"]";
+const oracleId = document.querySelector(oracleIdSelector)?.content;
 
 // Insert the table HTML into the page.
 function createNewTableElements(formats) {
@@ -187,7 +219,7 @@ function setLegality(elem, legality) {
 // Handle a format that scryfall has legality information for
 // but does not display by default.
 async function handleKnownFormat(elem, format) {
-    const cardURL = `https://api.scryfall.com/cards/${cardId}`;
+    const cardURL = `https://api.scryfall.com/cards/${scryfallId}`;
     const response = await fetch(cardURL);
     const json = await response.json();
     const legality = json.legalities[format];
@@ -256,7 +288,7 @@ async function main() {
 
     // Don't do anything if we're not looking at a single card.
     if (
-        cardId === undefined ||
+        scryfallId === undefined ||
         cardName === undefined ||
         oracleId === undefined
     ) {
