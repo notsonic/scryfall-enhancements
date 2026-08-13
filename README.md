@@ -1,6 +1,9 @@
 # MTG Enhancements Extension
 Add functionality to different popular MTG websites.
 
+![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/ckbcmcmddflkalgjnedkiohlmbjplppm)
+![Mozilla Add-on Version](https://img.shields.io/amo/v/mtg-enhancements)
+
 # Scryfall.com
 Add additional legalities to the Scryfall single card view page.
 Currently Premodern and Heritage are included.
