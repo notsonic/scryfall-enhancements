@@ -1,8 +1,8 @@
 # MTG Enhancements Extension
 Add functionality to different popular MTG websites.
 
-![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/ckbcmcmddflkalgjnedkiohlmbjplppm)
-![Mozilla Add-on Version](https://img.shields.io/amo/v/mtg-enhancements)
+![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/ckbcmcmddflkalgjnedkiohlmbjplppm?link=https%3A%2F%2Fchromewebstore.google.com%2Fdetail%2Fmtg-enhancements%2Fckbcmcmddflkalgjnedkiohlmbjplppm)
+![Mozilla Add-on Version](https://img.shields.io/amo/v/mtg-enhancements?link=https%3A%2F%2Faddons.mozilla.org%2Fen-US%2Ffirefox%2Faddon%2Fmtg-enhancements%2F)
 
 # Scryfall.com
 Add additional legalities to the Scryfall single card view page.
